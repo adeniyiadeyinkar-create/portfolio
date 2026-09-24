@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adeniyi Adeyinka — Creative Director</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --serif: 'Libre Baskerville', serif;
+    --display: 'Bebas Neue', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --accent: #e8c84a;
+    --accent2: #c45c3a;
+    --theme-duration: 0.4s;
+  }
+  [data-theme="dark"] {
+    --bg: #0a0a08; --bg2: #111110; --fg: #f0ece0; --muted: #2a2a24;
+    --border: rgba(240,236,224,0.08); --border-strong: rgba(240,236,224,0.15);
+    --card-hover: rgba(240,236,224,0.04); --overlay-start: rgba(10,10,8,0.95);
+    --marquee-bg: rgba(228,200,74,0.04); --process-bg: rgba(228,200,74,0.02);
+    --toggle-bg: rgba(240,236,224,0.08); --filter-active-bg: var(--accent);
+    --filter-active-fg: #0a0a08; --noise-opacity: 0.4;
+    --upload-bg: rgba(240,236,224,0.03); --upload-border: rgba(240,236,224,0.2);
+    --upload-hover-bg: rgba(228,200,74,0.07);
+  }
+  [data-theme="light"] {
+    --bg: #f5f2ea; --bg2: #ede9df; --fg: #1a1a14; --muted: #c8c4b4;
+    --border: rgba(26,26,20,0.1); --border-strong: rgba(26,26,20,0.2);
+    --card-hover: rgba(26,26,20,0.04); --overlay-start: rgba(245,242,234,0.97);
+    --marquee-bg: rgba(228,200,74,0.08); --process-bg: rgba(228,200,74,0.06);
+    --toggle-bg: rgba(26,26,20,0.08); --filter-active-bg: #1a1a14;
+    --filter-active-fg: #f5f2ea; --noise-opacity: 0.12;
+    --upload-bg: rgba(26,26,20,0.03); --upload-border: rgba(26,26,20,0.22);
+    --upload-hover-bg: rgba(228,200,74,0.1);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--serif);
+    cursor: none; overflow-x: hidden;
+    transition: background var(--theme-duration) ease, color var(--theme-duration) ease;
+  }
+
+  /* ================================================================
+     IMAGE UPLOAD SYSTEM
+     ================================================================ */
+  .img-wrapper { position: relative; overflow: hidden; }
+  .img-preview {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center center;
+    z-index: 1;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .img-zone {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.6rem; cursor: pointer;
+    background: var(--upload-bg);
+    border: 1.5px dashed var(--upload-border);
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .img-zone:hover,
+  .img-zone.drag-over {
+    background: var(--upload-hover-bg);
+    border-color: var(--accent);
+  }
+  .img-zone.drag-over { outline: 2px dashed var(--accent); outline-offset: -3px; }
+  .img-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 3;
+  }
+  .upload-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(228,200,74,0.08); border: 1.5px solid var(--upload-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; transition: border-color 0.25s, transform 0.25s;
+    pointer-events: none;
+  }
+  .img-zone:hover .upload-icon { border-color: var(--accent); transform: scale(1.08); }
+  .upload-label {
+    font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em;
+    text-transform: uppercase; opacity: 0.4; pointer-events: none;
+    text-align: center; line-height: 1.5; max-width: 110px;
+    transition: opacity 0.2s;
+  }
+  .img-zone:hover .upload-label { opacity: 0.7; }
+  .img-wrapper.has-image .img-zone {
+    background: transparent; border-color: transparent; opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .img-wrapper.has-image:hover .img-zone { opacity: 0.6; background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.3); }
+  .img-wrapper.has-image:hover .upload-icon { border-color: rgba(255,255,255,0.5); }
+  .img-wrapper.has-image:hover .upload-label { opacity: 0.9; color: #fff; }
+  .img-change-btn {
+    display: none; position: absolute; z-index: 10;
+    bottom: 0.65rem; right: 0.65rem;
+    background: rgba(10,10,8,0.8); color: #f0ece0;
+    font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.15em;
+    text-transform: uppercase; padding: 0.3rem 0.75rem;
+    border: 1px solid rgba(240,236,224,0.2); cursor: pointer;
+    backdrop-filter: blur(8px); transition: background 0.2s;
+    pointer-events: auto;
+  }
+  [data-theme="light"] .img-change-btn { background: rgba(245,242,234,0.88); color: #1a1a14; border-color: rgba(26,26,20,0.25); }
+  .img-change-btn:hover { background: rgba(228,200,74,0.25); border-color: var(--accent); }
+  .img-wrapper.has-image:hover .img-change-btn { display: block; }
+
+  /* ================================================================
+     SPECIFIC ZONE SHAPES
+     ================================================================ */
+  .hero-img-wrapper { position: absolute; inset: 0; z-index: 0; }
+  .hero-img-wrapper .img-zone { border: none; background: transparent; }
+  .hero-img-wrapper .img-zone:hover { background: rgba(0,0,0,0.15); }
+  .hero-img-wrapper .upload-icon { background: rgba(10,10,8,0.45); border-color: rgba(240,236,224,0.35); }
+  .hero-img-wrapper.has-image .img-zone { opacity: 0; }
+  .hero-img-wrapper.has-image:hover .img-zone { opacity: 1; background: rgba(0,0,0,0.3); border-color: transparent; }
+  .hero-img-wrapper.has-image:hover .img-change-btn { display: block; }
+  .hero-img-wrapper .img-change-btn { bottom: 4rem; right: 3rem; }
+  .hero-img-wrapper .img-preview::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,8,0.65) 0%, rgba(10,10,8,0.2) 60%, transparent 100%);
+    transition: background var(--theme-duration);
+  }
+  [data-theme="light"] .hero-img-wrapper .img-preview::after {
+    background: linear-gradient(to top, rgba(245,242,234,0.7) 0%, rgba(245,242,234,0.18) 60%, transparent 100%);
+  }
+  [data-theme="light"] #heroPreview {
+    background-image: url('https://assets.unlayer.com/projects/283079/1790251156036-ChatGPT%20Image%20Sep%2024_%202026_%2012_11_08%20PM.png') !important;
+  }
+
+  .about-photo-wrapper { aspect-ratio: 3/4; min-height: 280px; background: var(--muted); }
+
+  /* ================================================================
+     SERVICE CARDS — FIXED LAYOUT
+     ================================================================ */
+  .svc-img-wrapper {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--muted);
+    /* Ensure this is a self-contained block, not spilling into service-body */
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .service-item {
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s, border-color var(--theme-duration);
+    /* Flex column so image stacks ON TOP of body text */
+    display: flex;
+    flex-direction: column;
+  }
+  .service-item:hover { background: var(--card-hover); }
+  .service-item::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(228,200,74,0.05), transparent);
+    opacity: 0; transition: opacity 0.4s; z-index: 3; pointer-events: none;
+  }
+  .service-item:hover::before { opacity: 1; }
+
+  .service-body {
+    padding: 2rem 2.5rem 2.5rem;
+    flex: 1;
+    /* Ensure body is always below the image */
+    position: relative;
+    z-index: 1;
+  }
+
+  .work-img-wrapper { position: absolute; inset: 0; }
+  .print-img-wrapper { width: 100%; aspect-ratio: 4/3; background: var(--muted); }
+
+  /* ================================================================
+     THEME TOGGLE
+     ================================================================ */
+  .theme-toggle {
+    position: fixed; top: 50%; right: 2rem; transform: translateY(-50%);
+    z-index: 200; display: flex; flex-direction: column; align-items: center; gap: 0.7rem; cursor: none;
+  }
+  .toggle-label {
+    font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--fg); opacity: 0.35; writing-mode: vertical-rl; user-select: none;
+    transition: color var(--theme-duration);
+  }
+  .toggle-track {
+    width: 34px; height: 68px; background: var(--toggle-bg); border: 1px solid var(--border-strong);
+    border-radius: 20px; position: relative; cursor: none; backdrop-filter: blur(8px);
+    transition: background var(--theme-duration), border-color var(--theme-duration);
+  }
+  .toggle-thumb {
+    position: absolute; left: 50%; width: 22px; height: 22px; background: var(--accent);
+    border-radius: 50%; transform: translateX(-50%); top: 6px;
+    transition: top 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex; align-items: center; justify-content: center; font-size: 0.7rem; line-height: 1;
+    box-shadow: 0 2px 12px rgba(232,200,74,0.35);
+  }
+  [data-theme="light"] .toggle-thumb { top: 38px; }
+
+  /* ================================================================
+     CURSOR
+     ================================================================ */
+  .cursor {
+    position: fixed; width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9999; transform: translate(-50%,-50%);
+    mix-blend-mode: difference; transition: width 0.2s, height 0.2s;
+  }
+  .cursor-ring {
+    position: fixed; width: 40px; height: 40px; border: 1px solid var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+    transition: width 0.3s, height 0.3s, opacity 0.3s; opacity: 0.5;
+  }
+  body:hover .cursor-ring { opacity: 1; }
+
+  /* ================================================================
+     NAV
+     ================================================================ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.15rem 3rem;
+    background: rgba(10,10,8,0.82);
+    border-bottom: 1px solid rgba(240,236,224,0.16);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    transition: background var(--theme-duration), border-color var(--theme-duration), box-shadow var(--theme-duration);
+  }
+  [data-theme="light"] nav {
+    background: rgba(245,242,234,0.88);
+    border-bottom-color: rgba(26,26,20,0.16);
+    box-shadow: 0 10px 30px rgba(26,26,20,0.1);
+  }
+  .nav-logo { font-family: var(--display); font-size: 1.55rem; letter-spacing: 0.15em; color: var(--accent); text-decoration: none; line-height: 1; }
+  .nav-logo::after { content: ''; display: block; width: 24px; height: 2px; margin-top: 0.35rem; background: var(--accent2); transition: width 0.25s; }
+  .nav-logo:hover::after { width: 40px; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--fg); text-decoration: none; opacity: 0.78; position: relative; transition: opacity 0.2s, color 0.2s;
+  }
+  .nav-links a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -0.5rem; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.25s; }
+  .nav-links a:hover, .nav-links a:focus-visible { color: var(--accent); opacity: 1; }
+  .nav-links a:hover::after, .nav-links a:focus-visible::after { transform: scaleX(1); }
+  .nav-links a:focus-visible { outline: none; }
+
+  /* ================================================================
+     HERO
+     ================================================================ */
+  .hero { height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 4rem 3rem; position: relative; overflow: hidden; }
+  .hero-overlay {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse 80% 60% at 70% 30%, rgba(228,200,74,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 80% at 20% 80%, rgba(196,92,58,0.09) 0%, transparent 60%),
+                linear-gradient(to top, rgba(10,10,8,0.6) 0%, transparent 55%);
+    transition: background var(--theme-duration);
+  }
+  [data-theme="light"] .hero-overlay {
+    background: radial-gradient(ellipse 80% 60% at 70% 30%, rgba(228,200,74,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 80% at 20% 80%, rgba(196,92,58,0.12) 0%, transparent 60%),
+                linear-gradient(to top, rgba(245,242,234,0.65) 0%, transparent 55%);
+  }
+  .hero-noise {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: var(--noise-opacity); transition: opacity var(--theme-duration);
+  }
+  .hero-content { position: relative; z-index: 3; }
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero-title {
+    font-family: var(--display); font-size: clamp(5rem, 14vw, 13rem);
+    line-height: 0.88; letter-spacing: 0.02em; margin-bottom: 2rem;
+  }
+  .hero-title span { display: block; opacity: 0; transform: translateY(60px); }
+  .hero-title span:nth-child(1) { animation: fadeUp 0.9s 0.4s forwards; }
+  .hero-title span:nth-child(2) { animation: fadeUp 0.9s 0.55s forwards; color: var(--accent); }
+  .hero-bottom { display: flex; justify-content: space-between; align-items: flex-end; opacity: 0; animation: fadeUp 0.8s 0.8s forwards; }
+  .hero-desc { font-size: 1.05rem; font-style: italic; opacity: 0.6; max-width: 380px; line-height: 1.6; }
+  .hero-disciplines { display: flex; flex-direction: column; gap: 0.3rem; text-align: right; }
+  .hero-disciplines span { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.4; }
+  .hero-disciplines span.active { opacity: 1; color: var(--accent); }
+  .scroll-indicator {
+    position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    opacity: 0; animation: fadeIn 1s 1.2s forwards; z-index: 3;
+  }
+  .scroll-indicator span { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.4; }
+  .scroll-line { width: 1px; height: 50px; background: linear-gradient(to bottom, var(--accent), transparent); animation: pulse 2s infinite; }
+
+  /* ================================================================
+     MARQUEE
+     ================================================================ */
+  .marquee-section {
+    overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 1.2rem 0; background: var(--marquee-bg);
+    transition: background var(--theme-duration), border-color var(--theme-duration);
+  }
+  .marquee-track { display: flex; gap: 3rem; animation: marquee 20s linear infinite; width: max-content; }
+  .marquee-item { font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.15em; opacity: 0.4; white-space: nowrap; display: flex; align-items: center; gap: 2rem; }
+  .marquee-item::after { content: '◆'; color: var(--accent); font-size: 0.5rem; opacity: 1; }
+
+  /* ================================================================
+     ABOUT
+     ================================================================ */
+  .about { padding: 8rem 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; max-width: 1400px; margin: 0 auto; }
+  .about-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 2rem; }
+  .about-text h2 { font-family: var(--display); font-size: clamp(2.5rem, 4vw, 4rem); line-height: 1.1; margin-bottom: 2rem; }
+  .about-text p { font-size: 1rem; line-height: 1.8; opacity: 0.65; margin-bottom: 1.5rem; }
+  .about-right { display: flex; flex-direction: column; gap: 2.5rem; }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .stat { border-top: 1px solid var(--border-strong); padding-top: 1.5rem; transition: border-color var(--theme-duration); }
+  .stat-num { font-family: var(--display); font-size: 3.5rem; color: var(--accent); line-height: 1; margin-bottom: 0.5rem; }
+  .stat-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.5; }
+
+  /* ================================================================
+     SERVICES GRID — FIXED
+     ================================================================ */
+  .services { padding: 6rem 3rem; max-width: 1400px; margin: 0 auto; }
+  .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; transition: border-color var(--theme-duration); }
+  .section-title { font-family: var(--display); font-size: clamp(2rem, 3.5vw, 3rem); letter-spacing: 0.05em; }
+  .section-count { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; opacity: 0.4; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* No row-gap so borders between cards touch cleanly */
+    gap: 0;
+  }
+
+  .service-item {
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s, border-color var(--theme-duration);
+    /* KEY FIX: flex column keeps image on top, text below */
+    display: flex;
+    flex-direction: column;
+  }
+  .service-item:hover { background: var(--card-hover); }
+  .service-item::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(228,200,74,0.05), transparent);
+    opacity: 0; transition: opacity 0.4s; z-index: 3; pointer-events: none;
+  }
+  .service-item:hover::before { opacity: 1; }
+
+  /* Image wrapper — fixed height, never collapses */
+  .svc-img-wrapper {
+    width: 100%;
+    height: 200px;          /* explicit fixed height prevents collapse */
+    flex-shrink: 0;         /* never let it squish */
+    background: var(--muted);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Hover zoom on the preview image */
+  .service-item:hover .svc-img-wrapper .img-preview {
+    transform: scale(1.05);
+  }
+
+  .service-body {
+    padding: 2rem 2.5rem 2.5rem;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .service-icon { font-size: 1.8rem; margin-bottom: 1.2rem; display: block; }
+  .service-num { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 0.8rem; opacity: 0.7; }
+  .service-name { font-family: var(--display); font-size: 1.6rem; letter-spacing: 0.05em; margin-bottom: 0.8rem; line-height: 1.1; }
+  .service-desc { font-size: 0.85rem; line-height: 1.7; opacity: 0.5; }
+
+  /* ================================================================
+     WORK PORTFOLIO
+     ================================================================ */
+  .work { padding: 6rem 3rem; max-width: 1400px; margin: 0 auto; }
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 3rem; }
+  .filter-btn {
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 0.55rem 1.25rem; border: 1px solid var(--border-strong);
+    background: transparent; color: var(--fg); cursor: none; opacity: 0.5;
+    position: relative; overflow: hidden; transition: opacity 0.2s, border-color 0.25s;
+  }
+  .filter-btn::after { content: ''; position: absolute; inset: 0; background: var(--filter-active-bg); transform: scaleX(0); transform-origin: left; transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); z-index: 0; }
+  .filter-btn span { position: relative; z-index: 1; transition: color 0.25s; }
+  .filter-btn:hover { opacity: 0.75; }
+  .filter-btn.active { border-color: transparent; opacity: 1; color: var(--filter-active-fg); }
+  .filter-btn.active span { color: var(--filter-active-fg); }
+  .filter-btn.active::after { transform: scaleX(1); }
+
+  .work-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
+  .work-grid .work-item:nth-child(1) { grid-column: span 7; aspect-ratio: 16/10; }
+  .work-grid .work-item:nth-child(2) { grid-column: span 5; aspect-ratio: 4/5; }
+  .work-grid .work-item:nth-child(3) { grid-column: span 4; aspect-ratio: 1; }
+  .work-grid .work-item:nth-child(4) { grid-column: span 8; aspect-ratio: 16/9; }
+  .work-grid .work-item:nth-child(5) { grid-column: span 6; aspect-ratio: 16/10; }
+  .work-grid .work-item:nth-child(6) { grid-column: span 6; aspect-ratio: 16/10; }
+  .work-grid .work-item:nth-child(n) { grid-column: span 6; aspect-ratio: 16/10; }
+  .work-grid.filtered .work-item { grid-column: span 6 !important; aspect-ratio: 16/9 !important; }
+  .work-grid.filtered[data-count="1"] .work-item { grid-column: span 8 !important; }
+
+  .work-item {
+    position: relative; overflow: hidden; background: var(--muted); cursor: none;
+    transition: opacity 0.35s, transform 0.35s;
+  }
+  .work-item.hidden { display: none; }
+  .work-item.pop-in { animation: popIn 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) forwards; }
+  .work-item:hover .img-preview { transform: scale(1.05); }
+  .work-placeholder {
+    position: absolute; inset: 0; z-index: 1;
+    background-size: cover; background-position: center;
+  }
+  .work-visual {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display); font-size: clamp(3rem, 8vw, 8rem);
+    opacity: 0.07; letter-spacing: 0.1em; pointer-events: none;
+  }
+  .work-overlay {
+    position: absolute; inset: 0; z-index: 5;
+    background: linear-gradient(to top, var(--overlay-start) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.4s;
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem;
+    pointer-events: none;
+  }
+  .work-item:hover .work-overlay { opacity: 1; }
+  .work-grid .work-item:nth-child(2) .work-overlay,
+  .work-grid .work-item:nth-child(3) .work-overlay,
+  .work-grid .work-item:nth-child(4) .work-overlay,
+  .work-grid .work-item:nth-child(5) .work-overlay,
+  .work-grid .work-item:nth-child(6) .work-overlay,
+  .work-grid .work-item:nth-child(7) .work-overlay {
+    opacity: 1;
+  }
+  .work-grid .work-item:nth-child(2) .work-visual,
+  .work-grid .work-item:nth-child(3) .work-visual,
+  .work-grid .work-item:nth-child(4) .work-visual,
+  .work-grid .work-item:nth-child(5) .work-visual,
+  .work-grid .work-item:nth-child(6) .work-visual,
+  .work-grid .work-item:nth-child(7) .work-visual { color: var(--accent); opacity: 0.48; }
+  .work-cat { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .work-title { font-family: var(--display); font-size: 1.6rem; letter-spacing: 0.05em; line-height: 1.1; }
+  .work-empty { grid-column: span 12; padding: 5rem 2rem; text-align: center; display: none; }
+  .work-empty.show { display: block; }
+  .work-empty p { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.3; }
+
+    /* ================================================================
+      MOTION GRAPHICS
+      ================================================================ */
+    .motion-section { padding: 7rem 3rem; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .motion-inner { max-width: 1400px; margin: 0 auto; }
+    .motion-intro { display: flex; justify-content: space-between; gap: 4rem; align-items: end; margin-bottom: 4rem; }
+    .motion-kicker { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
+    .motion-title { font-family: var(--display); font-size: clamp(3.8rem, 8vw, 8rem); line-height: 0.86; letter-spacing: 0.02em; }
+    .motion-title em { font-family: var(--serif); font-size: 0.5em; color: var(--accent2); }
+    .motion-copy { max-width: 380px; font-size: 0.95rem; line-height: 1.8; opacity: 0.58; }
+    .motion-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+    .motion-project { min-height: 300px; position: relative; display: flex; align-items: flex-end; overflow: hidden; background: #111; color: var(--fg); text-decoration: none; }
+    .motion-project:nth-child(1), .motion-project:nth-child(2) { min-height: 380px; }
+    .motion-project-preview { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0.72; pointer-events: none; transition: transform 0.5s, opacity 0.35s; }
+    .motion-project:hover .motion-project-preview { transform: scale(1.04); opacity: 0.96; }
+    .motion-project-placeholder { position: absolute; inset: 0; background: radial-gradient(circle at 70% 25%, rgba(232,200,74,0.38), transparent 28%), linear-gradient(135deg, #201d13, #111 55%, #361d19); }
+    .motion-project:nth-child(3n) .motion-project-placeholder { background: radial-gradient(circle at 25% 35%, rgba(70,150,145,0.42), transparent 30%), linear-gradient(135deg, #101d1d, #111 58%, #1d2927); }
+    .motion-project:nth-child(3n + 2) .motion-project-placeholder { background: radial-gradient(circle at 68% 65%, rgba(196,92,58,0.46), transparent 30%), linear-gradient(135deg, #281813, #111 58%, #291d16); }
+    .motion-project-placeholder::after { content: 'MOTION'; position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: clamp(3rem, 7vw, 7rem); letter-spacing: 0.08em; opacity: 0.1; transform: rotate(-8deg); }
+    .motion-project-copy { position: relative; z-index: 2; width: 100%; padding: 1.5rem; min-height: 48%; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to top, rgba(10,10,8,0.96), transparent); }
+    .motion-project-index { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.6rem; }
+    .motion-project h3 { font-family: var(--display); font-size: 1.7rem; letter-spacing: 0.04em; line-height: 1; margin-bottom: 0.5rem; }
+    .motion-project p { font-size: 0.72rem; line-height: 1.5; opacity: 0.56; max-width: 280px; }
+    .motion-project-cta { margin-top: 0.9rem; font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); opacity: 0; transform: translateY(5px); transition: opacity 0.25s, transform 0.25s; }
+    .motion-project:hover .motion-project-cta { opacity: 1; transform: translateY(0); }
+
+  /* ================================================================
+     PROCESS
+     ================================================================ */
+  .process { padding: 6rem 3rem; background: var(--process-bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background var(--theme-duration), border-color var(--theme-duration); }
+  .process-inner { max-width: 1400px; margin: 0 auto; }
+  .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3rem; margin-top: 4rem; }
+  .step { padding-top: 1.5rem; border-top: 2px solid var(--border-strong); transition: border-color var(--theme-duration); }
+  .step.active-step { border-top-color: var(--accent); }
+  .step-num { font-family: var(--display); font-size: 4rem; color: var(--accent); opacity: 0.2; line-height: 1; margin-bottom: 1rem; }
+  .step-title { font-family: var(--display); font-size: 1.3rem; letter-spacing: 0.05em; margin-bottom: 0.8rem; }
+  .step-desc { font-size: 0.85rem; line-height: 1.7; opacity: 0.5; }
+
+  /* ================================================================
+     TOOLS
+     ================================================================ */
+  .tools { padding: 6rem 3rem; max-width: 1400px; margin: 0 auto; }
+  .tools-list { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 3rem; }
+  .tool-tag {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 0.6rem 1.4rem; border: 1px solid var(--border-strong); color: var(--fg); opacity: 0.6;
+    transition: all 0.25s;
+  }
+  .tool-tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(228,200,74,0.05); opacity: 1; }
+
+  /* ================================================================
+     PRINTING SECTION
+     ================================================================ */
+  .printing { position: relative; overflow: hidden; }
+  .printing-hero {
+    padding: 7rem 3rem 0; position: relative; background: var(--bg2);
+    border-top: 1px solid var(--border); overflow: hidden;
+    transition: background var(--theme-duration), border-color var(--theme-duration);
+  }
+  .printing-hero-noise { position: absolute; inset: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n2)' opacity='0.035'/%3E%3C/svg%3E"); opacity: var(--noise-opacity); }
+  .printing-accent-blob { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(196,92,58,0.09) 0%, transparent 70%); top: -200px; right: -150px; pointer-events: none; }
+  .printing-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4rem; position: relative; z-index: 1; }
+  .printing-badge { display: inline-flex; align-items: center; gap: 0.6rem; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent2); background: rgba(196,92,58,0.1); border: 1px solid rgba(196,92,58,0.25); padding: 0.5rem 1rem; margin-bottom: 1.5rem; }
+  .printing-badge::before { content: '◆'; font-size: 0.4rem; }
+  .printing-title { font-family: var(--display); font-size: clamp(3.5rem, 7vw, 7rem); line-height: 0.9; letter-spacing: 0.02em; }
+  .printing-title em { font-style: italic; font-family: var(--serif); font-size: 0.55em; color: var(--accent2); display: block; letter-spacing: 0.04em; }
+  .printing-intro { max-width: 360px; padding-top: 0.5rem; }
+  .printing-intro p { font-size: 0.9rem; line-height: 1.8; opacity: 0.55; margin-bottom: 1rem; }
+  .printing-tagline { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent2); opacity: 0.8; }
+  .printing-toggle { display: inline-flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem; padding: 0.75rem 1rem; border: 1px solid var(--border-strong); background: transparent; color: var(--fg); font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: color 0.25s, border-color 0.25s, background 0.25s; }
+  .printing-toggle:hover { color: var(--accent2); border-color: var(--accent2); background: rgba(196,92,58,0.08); }
+  .printing-toggle::after { content: '+'; font-size: 1rem; line-height: 0.7; transition: transform 0.25s; }
+  .printing.is-open .printing-toggle::after { transform: rotate(45deg); }
+  .printing:not(.is-open) .print-grid,
+  .printing:not(.is-open) .print-cta-strip,
+  .printing:not(.is-open) .print-marquee { display: none; }
+
+  .print-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); position: relative; z-index: 1; transition: border-color var(--theme-duration); }
+  .print-card {
+    padding: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden; cursor: none;
+    transition: background 0.35s, border-color var(--theme-duration);
+    display: flex; flex-direction: column;
+  }
+  .print-card:nth-child(4n) { border-right: none; }
+  .print-card:hover { background: rgba(196,92,58,0.03); }
+  .print-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, var(--accent2), transparent); transform: scaleX(0); transform-origin: left; z-index: 10; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .print-card:hover::after { transform: scaleX(1); }
+  .print-body { padding: 1.5rem 1.8rem 1.8rem; flex: 1; }
+  .print-icon { font-size: 1.5rem; margin-bottom: 0.7rem; display: block; transition: transform 0.3s; }
+  .print-card:hover .print-icon { transform: scale(1.1) rotate(-4deg); }
+  .print-num { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.3em; color: var(--accent2); opacity: 0.6; margin-bottom: 0.4rem; }
+  .print-name { font-family: var(--display); font-size: 1.15rem; letter-spacing: 0.05em; line-height: 1.15; margin-bottom: 0.55rem; }
+  .print-desc { font-size: 0.75rem; line-height: 1.65; opacity: 0.45; }
+
+  .print-cta-strip {
+    padding: 3.5rem 3rem; background: var(--bg2); border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;
+    position: relative; z-index: 1; transition: background var(--theme-duration), border-color var(--theme-duration);
+  }
+  .print-cta-strip-text h3 { font-family: var(--display); font-size: 2.2rem; letter-spacing: 0.05em; line-height: 1.05; margin-bottom: 0.5rem; }
+  .print-cta-strip-text p { font-size: 0.85rem; opacity: 0.5; line-height: 1.6; max-width: 380px; }
+  .print-cta-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.9rem 2rem; background: var(--accent2); color: #fff; border: none; cursor: none; text-decoration: none; transition: opacity 0.2s, transform 0.2s; display: inline-block; }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-outline { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.9rem 2rem; background: transparent; color: var(--fg); border: 1px solid var(--border-strong); cursor: none; text-decoration: none; transition: border-color 0.2s, color 0.2s; display: inline-block; }
+  .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .print-marquee { overflow: hidden; padding: 1rem 0; background: rgba(196,92,58,0.06); border-top: 1px solid rgba(196,92,58,0.15); border-bottom: 1px solid rgba(196,92,58,0.15); transition: background var(--theme-duration); }
+  [data-theme="light"] .print-marquee { background: rgba(196,92,58,0.08); }
+  .print-marquee-track { display: flex; gap: 2.5rem; animation: marquee 25s linear infinite; width: max-content; }
+  .print-marquee-item { font-family: var(--display); font-size: 0.9rem; letter-spacing: 0.2em; color: var(--accent2); opacity: 0.55; white-space: nowrap; display: flex; align-items: center; gap: 2rem; }
+  .print-marquee-item::after { content: '◆'; font-size: 0.45rem; opacity: 0.7; }
+
+  /* ================================================================
+     CTA + FOOTER
+     ================================================================ */
+  .cta { padding: 10rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .cta-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(228,200,74,0.06) 0%, transparent 70%); transition: background var(--theme-duration); }
+  [data-theme="light"] .cta-bg { background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(228,200,74,0.14) 0%, transparent 70%); }
+  .cta h2 { font-family: var(--display); font-size: clamp(3rem, 10vw, 9rem); line-height: 0.9; letter-spacing: 0.02em; margin-bottom: 2.5rem; position: relative; z-index: 1; }
+  .cta h2 em { font-style: italic; color: var(--accent); font-family: var(--serif); font-size: 0.7em; }
+  .cta-email { font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--fg); text-decoration: none; opacity: 0.5; border-bottom: 1px solid var(--border-strong); padding-bottom: 0.3rem; transition: opacity 0.2s, color 0.2s; position: relative; z-index: 1; }
+  .cta-email:hover { opacity: 1; color: var(--accent); }
+  .cta-social { display: flex; justify-content: center; gap: 2rem; margin-top: 3rem; position: relative; z-index: 1; }
+  .cta-social a { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--fg); text-decoration: none; opacity: 0.3; transition: opacity 0.2s; }
+  .cta-social a:hover { opacity: 0.9; }
+  footer { padding: 2rem 3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: border-color var(--theme-duration); }
+  footer span { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em; opacity: 0.3; }
+  .deco-line { width: 40px; height: 2px; background: var(--accent); margin: 1.5rem 0; }
+
+  /* ================================================================
+     ANIMATIONS + REVEAL
+     ================================================================ */
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.93); } to { opacity: 1; transform: scale(1); } }
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s, transform 0.7s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ================================================================
+     RESPONSIVE
+     ================================================================ */
+  @media (max-width: 1100px) {
+    .print-grid { grid-template-columns: repeat(3, 1fr); }
+    .print-card:nth-child(4n) { border-right: 1px solid var(--border); }
+    .print-card:nth-child(3n) { border-right: none; }
+  }
+  @media (max-width: 1000px) {
+    .work-grid .work-item:nth-child(n) { grid-column: span 12 !important; aspect-ratio: 16/9 !important; }
+    .work-grid.filtered .work-item { grid-column: span 12 !important; }
+  }
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; } .nav-links { display: none; }
+    .hero { padding: 2rem 1.5rem; }
+    .about { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
+    .services-grid { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: 1fr 1fr; }
+    .services, .work, .tools { padding: 4rem 1.5rem; }
+    .process, .printing-hero { padding: 4rem 1.5rem 0; }
+    .cta { padding: 6rem 1.5rem; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    .theme-toggle { top: auto; bottom: 1.5rem; right: 1.5rem; transform: none; flex-direction: row; gap: 0.5rem; }
+    .toggle-track { width: 58px; height: 30px; border-radius: 15px; }
+    .toggle-thumb { top: 50%; left: 4px; width: 20px; height: 20px; transform: translateY(-50%); }
+    [data-theme="light"] .toggle-thumb { left: auto; right: 4px; }
+    .toggle-label { writing-mode: horizontal-tb; font-size: 0.45rem; }
+    .printing-top { flex-direction: column; gap: 2rem; }
+    .printing-intro { max-width: 100%; }
+    .print-cta-strip { flex-direction: column; align-items: flex-start; padding: 2.5rem 1.5rem; }
+    .motion-section { padding: 5rem 1.5rem; }
+    .motion-intro { flex-direction: column; align-items: flex-start; gap: 2rem; }
+    .motion-copy { max-width: 100%; }
+    .motion-gallery { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 750px) {
+    .print-grid { grid-template-columns: repeat(2, 1fr); }
+    .print-card:nth-child(4n) { border-right: 1px solid var(--border); }
+    .print-card:nth-child(3n) { border-right: 1px solid var(--border); }
+    .print-card:nth-child(2n) { border-right: none; }
+    .motion-gallery { grid-template-columns: 1fr; }
+    .motion-project, .motion-project:nth-child(1), .motion-project:nth-child(2) { min-height: 300px; }
+  }
+  @media (max-width: 480px) {
+    .print-grid { grid-template-columns: 1fr; }
+    .print-card { border-right: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Theme Toggle -->
+<div class="theme-toggle" id="themeToggle">
+  <span class="toggle-label">Light</span>
+  <div class="toggle-track">
+    <div class="toggle-thumb" id="toggleThumb"><span id="toggleIcon">☀</span></div>
+  </div>
+  <span class="toggle-label">Dark</span>
+</div>
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-logo">AA</a>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#motion">Motion</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#printing">Print</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ============================
+     HERO
+     ============================ -->
+<section class="hero">
+  <div class="img-wrapper hero-img-wrapper has-image" id="heroWrapper">
+    <div class="img-preview" id="heroPreview" style="background-image:url('https://assets.unlayer.com/projects/283079/1790250901322-ChatGPT%20Image%20Sep%2024_%202026_%2012_19_44%20PM.png');background-size:cover;background-position:center;"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Creative Director & Multi-Disciplinary Designer</p>
+    <h1 class="hero-title">
+      <span>Adeniyi</span>
+      <span>Adeyinka</span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-desc"><em>Crafting worlds through design, motion, and storytelling — where every pixel has a purpose.</em></p>
+      <div class="hero-disciplines">
+        <span class="active">Graphic Design</span>
+        <span class="active">Product Design</span>
+        <span class="active">Motion Design</span>
+        <span class="active">Video Editing</span>
+        <span class="active">3D & Visual FX</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator"><div class="scroll-line"></div><span>Scroll</span></div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item">Graphic Design</div><div class="marquee-item">Product Design</div><div class="marquee-item">Motion Graphics</div><div class="marquee-item">Video Editing</div><div class="marquee-item">3D Design</div><div class="marquee-item">Brand Identity</div><div class="marquee-item">UI / UX</div><div class="marquee-item">Visual Effects</div>
+    <div class="marquee-item">Graphic Design</div><div class="marquee-item">Product Design</div><div class="marquee-item">Motion Graphics</div><div class="marquee-item">Video Editing</div><div class="marquee-item">3D Design</div><div class="marquee-item">Brand Identity</div><div class="marquee-item">UI / UX</div><div class="marquee-item">Visual Effects</div>
+  </div>
+</div>
+
+<!-- ============================
+     ABOUT
+     ============================ -->
+<section class="about" id="about">
+  <div class="about-text reveal">
+    <p class="about-label">About / Background</p>
+    <h2>Turning Ideas Into Experiences</h2>
+    <div class="deco-line"></div>
+    <p>I'm Adeniyi Adeyinka, a multi-disciplinary creative who lives at the intersection of design, motion, and storytelling. From brand identities to cinematic 3D sequences, I bring a holistic perspective to every project.</p>
+    <p>My work spans graphic and product design, motion graphics, video editing, and immersive 3D worlds — always anchored in a deep understanding of the story being told and the audience feeling it.</p>
+    <div class="about-stats">
+      <div class="stat"><div class="stat-num">7+</div><div class="stat-label">Years Experience</div></div>
+      <div class="stat"><div class="stat-num">200+</div><div class="stat-label">Projects Done</div></div>
+      <div class="stat"><div class="stat-num">110+</div><div class="stat-label">Happy Clients</div></div>
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Disciplines</div></div>
+    </div>
+  </div>
+  <div class="about-right reveal">
+    <div class="img-wrapper about-photo-wrapper has-image" id="aboutWrapper">
+      <div class="img-preview" id="aboutPreview" style="background-image:url('https://assets.unlayer.com/projects/284664/1771888496846-Adeyinka.jpeg');background-size:cover;background-position:center;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     SERVICES — FIXED
+     ============================ -->
+<section class="services" id="services">
+  <div class="section-header reveal">
+    <h2 class="section-title">What I Do</h2>
+    <span class="section-count">05 Services</span>
+  </div>
+  <div class="services-grid">
+
+    <!-- Card 1: Graphic Design -->
+    <div class="service-item reveal">
+      <div class="img-wrapper svc-img-wrapper has-image" id="svc1Wrapper">
+        <div class="img-preview" id="svc1Preview" style="background-image:url('https://assets.unlayer.com/projects/284664/1771890965694-WhatsApp Image 2026-02-23 at 12.12.15 AM.jpeg');background-size:cover;background-position:center;"></div>
+      </div>
+      <div class="service-body">
+        <span class="service-icon">✦</span>
+        <p class="service-num">01</p>
+        <h3 class="service-name">Graphic Design</h3>
+        <p class="service-desc">Brand identities, visual systems, print & digital design. Every mark carries meaning, every layout tells a story.</p>
+      </div>
+    </div>
+
+    <!-- Card 2: Product Design -->
+    <div class="service-item reveal">
+      <div class="img-wrapper svc-img-wrapper has-image" id="svc2Wrapper">
+        <div class="img-preview" id="svc2Preview" style="background-image:url('https://assets.unlayer.com/projects/284664/1771927079456-WhatsApp Image 2026-02-23 at 12.05.01 AM.jpeg');background-size:cover;background-position:center;"></div>
+      </div>
+      <div class="service-body">
+        <span class="service-icon">◈</span>
+        <p class="service-num">02</p>
+        <h3 class="service-name">Product Design</h3>
+        <p class="service-desc">User-centered digital products built on research, clarity, and elegant interaction — from wireframe to polished UI.</p>
+      </div>
+    </div>
+
+    <!-- Card 3: Motion Design -->
+    <div class="service-item reveal">
+      <div class="img-wrapper svc-img-wrapper has-image" id="svc3Wrapper">
+        <div class="img-preview" id="svc3Preview" style="background-image:url('https://assets.unlayer.com/projects/284664/1771927992767-WhatsApp Image 2026-02-23 at 12.12.20 AM.jpeg');background-size:cover;background-position:center;"></div>
+      </div>
+      <div class="service-body">
+        <span class="service-icon">⟳</span>
+        <p class="service-num">03</p>
+        <h3 class="service-name">Motion Design</h3>
+        <p class="service-desc">Animated brand systems, explainer videos, motion graphics that breathe life into static ideas.</p>
+      </div>
+    </div>
+
+    <!-- Card 4: Video Editing -->
+    <div class="service-item reveal">
+      <div class="img-wrapper svc-img-wrapper has-image" id="svc4Wrapper">
+        <div class="img-preview" id="svc4Preview" style="background-image:url('https://assets.unlayer.com/projects/284664/1771946128270-video%20editing.jpeg');background-size:cover;background-position:center;"></div>
+      </div>
+      <div class="service-body">
+        <span class="service-icon">▶</span>
+        <p class="service-num">04</p>
+        <h3 class="service-name">Video Editing</h3>
+        <p class="service-desc">Narrative-driven editing with rhythm, pacing, and purpose — from commercial cuts to documentary storytelling.</p>
+      </div>
+    </div>
+
+    <!-- Card 5: 3D Design & VFX -->
+    <div class="service-item reveal">
+      <div class="img-wrapper svc-img-wrapper has-image" id="svc5Wrapper">
+        <div class="img-preview" id="svc5Preview" style="background-image:url('https://assets.unlayer.com/projects/284664/1771945209007-WhatsApp Image 2026-02-24 at 2.57.51 AM.jpeg');background-size:cover;background-position:center;"></div>
+      </div>
+      <div class="service-body">
+        <span class="service-icon">◉</span>
+        <p class="service-num">05</p>
+        <h3 class="service-name">3D Design & VFX</h3>
+        <p class="service-desc">Modeling, rendering, compositing and visual effects for product visualization, environments, and immersive sequences.</p>
+      </div>
+    </div>
+
+    <!-- Card 6: Quote -->
+    <div class="service-item reveal" style="border-left: 2px solid var(--accent);">
+      <div class="service-body" style="height:100%;display:flex;flex-direction:column;justify-content:center;">
+        <p style="font-family:var(--serif);font-style:italic;font-size:1.05rem;line-height:1.7;opacity:0.5;margin-bottom:1.5rem;">"Good design is not just how it looks — it's how it moves, how it speaks, and how it makes people feel."</p>
+        <div class="deco-line"></div>
+        <p style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.2em;opacity:0.3;text-transform:uppercase;">— Adeniyi Adeyinka</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================
+     WORK PORTFOLIO
+     ============================ -->
+<section class="work" id="work">
+  <div class="section-header reveal">
+    <h2 class="section-title">Selected Work</h2>
+    <span class="section-count" id="workCount">7 Projects</span>
+  </div>
+  <div class="filter-bar reveal">
+    <button class="filter-btn active" data-filter="all"><span>All Work</span></button>
+    <button class="filter-btn" data-filter="brand-identity"><span>Brand Identity</span></button>
+    <button class="filter-btn" data-filter="product-design"><span>Product Design</span></button>
+    <button class="filter-btn" data-filter="motion-graphics"><span>Motion Graphics</span></button>
+    <button class="filter-btn" data-filter="video-edit"><span>Video Edit</span></button>
+    <button class="filter-btn" data-filter="3d-vfx"><span>3D / VFX</span></button>
+    <button class="filter-btn" data-filter="web-design"><span>Web Design</span></button>
+  </div>
+  <div class="work-grid" id="workGrid">
+
+    <div class="work-item" data-category="3d-vfx">
+      <div class="work-placeholder" style="background:linear-gradient(160deg,#130d20,#1f0d15,#200a08);"></div>
+      <div class="img-wrapper work-img-wrapper" id="w2Wrapper" style="position:absolute;inset:0;background:transparent;">
+        <div class="img-preview" id="w2Preview"></div>
+        <div class="img-zone" style="background:transparent;border:none;"><input type="file" accept="image/*" onchange="loadImg('w2Wrapper',this)"><div class="upload-icon" style="background:rgba(10,10,8,0.5);border-color:rgba(240,236,224,0.3);">📁</div><div class="upload-label" style="color:#f0ece0;">Add project image</div></div>
+        <button class="img-change-btn" onclick="triggerUpload('w2Wrapper')">↺ Change</button>
+      </div>
+      <div class="work-visual">3D</div>
+      <div class="work-overlay"><p class="work-cat">3D / Product Viz</p><h3 class="work-title">Apex Bottle<br>Campaign</h3></div>
+    </div>
+
+    <a class="work-item" data-category="web-design" href="https://zeeweding.vercel.app/" target="_blank" rel="noopener" aria-label="Open Zeeweding wedding invitation website">
+      <div class="work-placeholder" style="background:linear-gradient(135deg,#281b1d,#6b3b37,#d0a26c);"></div>
+      <div class="work-visual">WEDDING</div>
+      <div class="work-overlay"><p class="work-cat">Web Design</p><h3 class="work-title">Zeeweding<br>Wedding Experience</h3><span class="work-title" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;margin-top:0.8rem;color:var(--accent);">Open Website ↗</span></div>
+    </a>
+
+    <a class="work-item" data-category="brand-identity" href="https://www.behance.net/gallery/203808753/Knowledge-Hour" target="_blank" rel="noopener" aria-label="Open Knowledge Hour project on Behance">
+      <div class="work-placeholder" style="background:linear-gradient(135deg,#161b2c,#52628e,#d9b36c);"></div><div class="work-visual">KNOWLEDGE</div>
+      <div class="work-overlay"><p class="work-cat">Brand Identity / Behance</p><h3 class="work-title">Knowledge<br>Hour</h3><span class="work-title" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;margin-top:0.8rem;color:var(--accent);">View Project ↗</span></div>
+    </a>
+
+    <a class="work-item" data-category="brand-identity" href="https://www.behance.net/gallery/200394369/Mr-Chef-Design" target="_blank" rel="noopener" aria-label="Open Mr Chef Design project on Behance">
+      <div class="work-placeholder" style="background:linear-gradient(140deg,#21130d,#a94b2e,#e1b56b);"></div><div class="work-visual">CHEF</div>
+      <div class="work-overlay"><p class="work-cat">Brand Identity / Behance</p><h3 class="work-title">Mr Chef<br>Design</h3><span class="work-title" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;margin-top:0.8rem;color:var(--accent);">View Project ↗</span></div>
+    </a>
+
+    <a class="work-item" data-category="brand-identity" href="https://www.behance.net/gallery/200393507/Alomo-Designs" target="_blank" rel="noopener" aria-label="Open Alomo Designs project on Behance">
+      <div class="work-placeholder" style="background:linear-gradient(135deg,#142a1e,#477557,#d6b66c);"></div><div class="work-visual">ALOMO</div>
+      <div class="work-overlay"><p class="work-cat">Brand Identity / Behance</p><h3 class="work-title">Alomo<br>Designs</h3><span class="work-title" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;margin-top:0.8rem;color:var(--accent);">View Project ↗</span></div>
+    </a>
+
+    <a class="work-item" data-category="motion-graphics" href="https://www.instagram.com/usepafet/" target="_blank" rel="noopener" aria-label="Open Pafet motion work on Instagram">
+      <div class="work-placeholder" style="background:linear-gradient(135deg,#241126,#8d3e69,#e0a34e);"></div><div class="work-visual">PAFET</div>
+      <div class="work-overlay"><p class="work-cat">Motion Graphics / Instagram</p><h3 class="work-title">Pafet<br>Motion Work</h3><span class="work-title" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;margin-top:0.8rem;color:var(--accent);">View Instagram ↗</span></div>
+    </a>
+
+    <a class="work-item" data-category="motion-graphics" href="https://drive.google.com/drive/folders/1zYBnhXfrS5hGbcu7l1jcWAo5yr20rK5o?role=writer" target="_blank" rel="noopener" aria-label="Open motion graphics archive on Google Drive">
+      <div class="work-placeholder" style="background:linear-gradient(135deg,#101d1d,#23615d,#c45c3a);"></div><div class="work-visual">MOTION</div>
+      <div class="work-overlay"><p class="work-cat">Motion Graphics / Google Drive</p><h3 class="work-title">Motion<br>Archive</h3><span class="work-title" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;margin-top:0.8rem;color:var(--accent);">Open Drive ↗</span></div>
+    </a>
+
+    <div class="work-empty" id="workEmpty"><p>No projects in this category yet — check back soon.</p></div>
+  </div>
+</section>
+
+<!-- ============================
+     MOTION GRAPHICS
+     ============================ -->
+<section class="motion-section" id="motion">
+  <div class="motion-inner">
+    <div class="motion-intro reveal">
+      <div><p class="motion-kicker">Motion Graphics / Selected Work</p><h2 class="motion-title">Ideas<br><em>In Motion</em></h2></div>
+      <p class="motion-copy">Explore the full motion archive. Each project is watchable from the gallery, and every card opens the source on Google Drive.</p>
+    </div>
+    <div class="motion-gallery">
+      <a class="motion-project reveal" href="https://drive.google.com/file/d/19CkuLjK-OxRdaNWAY2Qjr3ykVdHKOfCt/view" target="_blank" rel="noopener"><iframe class="motion-project-preview" src="https://drive.google.com/file/d/19CkuLjK-OxRdaNWAY2Qjr3ykVdHKOfCt/preview" title="Stabnance Intro Motion" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe><div class="motion-project-copy"><span class="motion-project-index">01 / INTRO MOTION</span><h3>Stabnance Intro</h3><p>Brand introduction with cinematic product movement.</p><span class="motion-project-cta">Watch on Google Drive ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/file/d/1vWgRqhnH2qhUGeQdH-EN5ibshlguS88c/view" target="_blank" rel="noopener"><iframe class="motion-project-preview" src="https://drive.google.com/file/d/1vWgRqhnH2qhUGeQdH-EN5ibshlguS88c/preview" title="Stabnance Landscape Motion" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe><div class="motion-project-copy"><span class="motion-project-index">02 / LANDSCAPE MOTION</span><h3>Stabnance Landscape</h3><p>Wide-format product motion built for cinematic impact.</p><span class="motion-project-cta">Watch on Google Drive ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/file/d/13X7tZJY6eeEmcpDj64vqA3o4L20XDz4r/view" target="_blank" rel="noopener"><iframe class="motion-project-preview" src="https://drive.google.com/file/d/13X7tZJY6eeEmcpDj64vqA3o4L20XDz4r/preview" title="Stabnance Download Motion" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe><div class="motion-project-copy"><span class="motion-project-index">03 / CAMPAIGN EDIT</span><h3>Stabnance Launch</h3><p>Long-form campaign edit with product energy and pace.</p><span class="motion-project-cta">Watch on Google Drive ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/file/d/109YIrd7czpdojXLptpSPGOWPguO_zEwG/view" target="_blank" rel="noopener"><iframe class="motion-project-preview" src="https://drive.google.com/file/d/109YIrd7czpdojXLptpSPGOWPguO_zEwG/preview" title="Stabnance Waitlist Motion" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe><div class="motion-project-copy"><span class="motion-project-index">04 / SOCIAL MOTION</span><h3>Almost Here</h3><p>Short-form launch storytelling made to stop the scroll.</p><span class="motion-project-cta">Watch on Google Drive ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/drive/folders/1zYBnhXfrS5hGbcu7l1jcWAo5yr20rK5o?role=writer" target="_blank" rel="noopener"><span class="motion-project-placeholder"></span><div class="motion-project-copy"><span class="motion-project-index">05 / DIGITAL FINANCE</span><h3>Building the Future</h3><p>Crypto, gift cards, and cross-border payments campaign.</p><span class="motion-project-cta">Open motion folder ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/drive/folders/1zYBnhXfrS5hGbcu7l1jcWAo5yr20rK5o?role=writer" target="_blank" rel="noopener"><span class="motion-project-placeholder"></span><div class="motion-project-copy"><span class="motion-project-index">06 / EURO SUPPORT</span><h3>Euro Support Live</h3><p>Product update motion for a global fintech audience.</p><span class="motion-project-cta">Open motion folder ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/drive/folders/1zYBnhXfrS5hGbcu7l1jcWAo5yr20rK5o?role=writer" target="_blank" rel="noopener"><span class="motion-project-placeholder"></span><div class="motion-project-copy"><span class="motion-project-index">07 / GBP MOTION</span><h3>Pafet GBP Motion</h3><p>Currency-focused motion piece from the latest folder update.</p><span class="motion-project-cta">Open motion folder ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/drive/folders/1zYBnhXfrS5hGbcu7l1jcWAo5yr20rK5o?role=writer" target="_blank" rel="noopener"><span class="motion-project-placeholder"></span><div class="motion-project-copy"><span class="motion-project-index">08 / PAYMENTS</span><h3>Payments. Business. Global.</h3><p>Teaser motion for payments and business expansion.</p><span class="motion-project-cta">Open motion folder ↗</span></div></a>
+      <a class="motion-project reveal" href="https://drive.google.com/drive/folders/1zYBnhXfrS5hGbcu7l1jcWAo5yr20rK5o?role=writer" target="_blank" rel="noopener"><span class="motion-project-placeholder"></span><div class="motion-project-copy"><span class="motion-project-index">09 / PLATFORM STORY</span><h3>One Platform</h3><p>Multi-service fintech story built for social viewing.</p><span class="motion-project-cta">Open motion folder ↗</span></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="process">
+  <div class="process-inner">
+    <div class="section-header reveal"><h2 class="section-title">How I Work</h2><span class="section-count">My Process</span></div>
+    <div class="process-steps">
+      <div class="step active-step reveal"><div class="step-num">01</div><h3 class="step-title">Discover</h3><p class="step-desc">Deep dives into your brand, audience, goals, and context. I listen first, then think.</p></div>
+      <div class="step reveal"><div class="step-num">02</div><h3 class="step-title">Define</h3><p class="step-desc">Clear creative direction, strategy, and scope before a single pixel is touched.</p></div>
+      <div class="step reveal"><div class="step-num">03</div><h3 class="step-title">Design</h3><p class="step-desc">Iterative creation — concepts refined through feedback, with intention at every step.</p></div>
+      <div class="step reveal"><div class="step-num">04</div><h3 class="step-title">Deliver</h3><p class="step-desc">Polished, production-ready assets with full handover, documentation, and support.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Tools -->
+<section class="tools">
+  <div class="section-header reveal"><h2 class="section-title">Tools & Tech</h2><span class="section-count">My Stack</span></div>
+  <div class="tools-list reveal">
+    <span class="tool-tag">Adobe Photoshop</span><span class="tool-tag">Illustrator</span><span class="tool-tag">InDesign</span><span class="tool-tag">After Effects</span><span class="tool-tag">Premiere Pro</span><span class="tool-tag">Figma</span><span class="tool-tag">Cinema 4D</span><span class="tool-tag">Blender</span><span class="tool-tag">DaVinci Resolve</span><span class="tool-tag">ZBrush</span><span class="tool-tag">Substance Painter</span><span class="tool-tag">Redshift</span><span class="tool-tag">Octane</span><span class="tool-tag">Spline</span><span class="tool-tag">Adobe XD</span><span class="tool-tag">Procreate</span><span class="tool-tag">Midjourney</span>
+  </div>
+</section>
+
+<!-- ============================
+     PRINTING & PRODUCTION
+     ============================ -->
+<section class="printing" id="printing">
+  <div class="printing-hero">
+    <div class="printing-hero-noise"></div>
+    <div class="printing-accent-blob"></div>
+    <div class="printing-top reveal">
+      <div>
+        <div class="printing-badge">Print Production</div>
+        <h2 class="printing-title">Printing<br><em>& Production</em></h2>
+      </div>
+      <div class="printing-intro">
+        <p>Beyond the screen, design lives in the physical world. Every printed piece is crafted with the same attention to detail as our digital work.</p>
+        <p class="printing-tagline">Design → Print → Deliver</p>
+        <button class="printing-toggle" type="button" aria-expanded="false" aria-controls="printDetails">View print services</button>
+      </div>
+    </div>
+
+    <div class="print-details" id="printDetails">
+    <div class="print-grid">
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p1Wrapper"><div class="img-preview" id="p1Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p1Wrapper',this)"><div class="upload-icon">🖼</div><div class="upload-label">Add banner photo</div></div><button class="img-change-btn" onclick="triggerUpload('p1Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🖼️</span><p class="print-num">01</p><h3 class="print-name">Banners & Flex</h3><p class="print-desc">Roll-up banners, pull-up stands, vinyl flex banners for events, trade shows, and outdoor advertising.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p2Wrapper"><div class="img-preview" id="p2Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p2Wrapper',this)"><div class="upload-icon">🏷</div><div class="upload-label">Add sticker photo</div></div><button class="img-change-btn" onclick="triggerUpload('p2Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🏷️</span><p class="print-num">02</p><h3 class="print-name">Stickers & Labels</h3><p class="print-desc">Custom die-cut stickers, waterproof labels, product packaging labels — glossy, matte, or holographic.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p3Wrapper"><div class="img-preview" id="p3Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p3Wrapper',this)"><div class="upload-icon">🛍</div><div class="upload-label">Add bag photo</div></div><button class="img-change-btn" onclick="triggerUpload('p3Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🛍️</span><p class="print-num">03</p><h3 class="print-name">Paper Bags</h3><p class="print-desc">Branded paper bags for retail, gifting, and corporate use. Custom sizes, full-color printing, kraft or glossy.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p4Wrapper"><div class="img-preview" id="p4Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p4Wrapper',this)"><div class="upload-icon">👕</div><div class="upload-label">Add shirt photo</div></div><button class="img-change-btn" onclick="triggerUpload('p4Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">👕</span><p class="print-num">04</p><h3 class="print-name">T-Shirt Printing</h3><p class="print-desc">Custom tee printing via screen print, DTF, or vinyl heat transfer. Uniforms, events, merchandise.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p5Wrapper"><div class="img-preview" id="p5Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p5Wrapper',this)"><div class="upload-icon">🧴</div><div class="upload-label">Add bag photo</div></div><button class="img-change-btn" onclick="triggerUpload('p5Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🧴</span><p class="print-num">05</p><h3 class="print-name">Nylon & Bag Printing</h3><p class="print-desc">Printed nylon bags, non-woven shopping bags, and tote bags for branding, gifting, and retail.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p6Wrapper"><div class="img-preview" id="p6Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p6Wrapper',this)"><div class="upload-icon">🎨</div><div class="upload-label">Add DI sample</div></div><button class="img-change-btn" onclick="triggerUpload('p6Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🎨</span><p class="print-num">06</p><h3 class="print-name">Direct Image (DI)</h3><p class="print-desc">Direct-to-substrate on boards, acrylic, wood, foam. Photographic-quality output at any scale.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p7Wrapper"><div class="img-preview" id="p7Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p7Wrapper',this)"><div class="upload-icon">🪟</div><div class="upload-label">Add SAV sample</div></div><button class="img-change-btn" onclick="triggerUpload('p7Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🪟</span><p class="print-num">07</p><h3 class="print-name">SAV Printing</h3><p class="print-desc">Self-adhesive vinyl for window branding, wall wraps, vehicle graphics, and floor stickers.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p8Wrapper"><div class="img-preview" id="p8Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p8Wrapper',this)"><div class="upload-icon">💼</div><div class="upload-label">Add card photo</div></div><button class="img-change-btn" onclick="triggerUpload('p8Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">💼</span><p class="print-num">08</p><h3 class="print-name">Business Cards</h3><p class="print-desc">Premium spot UV, matte laminate, foil-stamped, or letterpress cards. First impressions that last.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p9Wrapper"><div class="img-preview" id="p9Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p9Wrapper',this)"><div class="upload-icon">🪧</div><div class="upload-label">Add signage photo</div></div><button class="img-change-btn" onclick="triggerUpload('p9Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🪧</span><p class="print-num">09</p><h3 class="print-name">Signage</h3><p class="print-desc">Indoor and outdoor signage — acrylic signs, 3D raised lettering, directional boards, illuminated fascias.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p10Wrapper"><div class="img-preview" id="p10Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p10Wrapper',this)"><div class="upload-icon">☕</div><div class="upload-label">Add mug photo</div></div><button class="img-change-btn" onclick="triggerUpload('p10Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">☕</span><p class="print-num">10</p><h3 class="print-name">Mugs & Drinkware</h3><p class="print-desc">Branded mugs, travel cups, and drinkware. Sublimation print, full wrap available.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p11Wrapper"><div class="img-preview" id="p11Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p11Wrapper',this)"><div class="upload-icon">🎁</div><div class="upload-label">Add souvenir photo</div></div><button class="img-change-btn" onclick="triggerUpload('p11Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">🎁</span><p class="print-num">11</p><h3 class="print-name">Souvenirs & Gifts</h3><p class="print-desc">Custom branded keychains, pens, notebooks, plaques for events, promos, and appreciation gifts.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p12Wrapper"><div class="img-preview" id="p12Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p12Wrapper',this)"><div class="upload-icon">📔</div><div class="upload-label">Add jotter photo</div></div><button class="img-change-btn" onclick="triggerUpload('p12Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">📔</span><p class="print-num">12</p><h3 class="print-name">Jotters & Notepads</h3><p class="print-desc">Custom-printed jotters, spiral-bound notepads, and branded stationery for conferences and gifting.</p></div>
+      </div>
+
+      <div class="print-card reveal">
+        <div class="img-wrapper print-img-wrapper" id="p13Wrapper"><div class="img-preview" id="p13Preview"></div><div class="img-zone"><input type="file" accept="image/*" onchange="loadImg('p13Wrapper',this)"><div class="upload-icon">💌</div><div class="upload-label">Add invite photo</div></div><button class="img-change-btn" onclick="triggerUpload('p13Wrapper')">↺ Change</button></div>
+        <div class="print-body"><span class="print-icon">💌</span><p class="print-num">13</p><h3 class="print-name">Invitation Cards</h3><p class="print-desc">Luxe wedding, corporate, and event invitations — foil, emboss, or full-color on premium card stocks.</p></div>
+      </div>
+
+      <div class="print-card reveal" style="background:rgba(196,92,58,0.05);border-left:2px solid var(--accent2);">
+        <div class="print-body" style="height:100%;display:flex;flex-direction:column;justify-content:center;">
+          <span class="print-icon" style="opacity:0.3;">✦</span>
+          <p style="font-family:var(--serif);font-style:italic;font-size:0.9rem;line-height:1.7;opacity:0.5;margin-bottom:1rem;">"Every physical touchpoint is a brand moment. We make sure yours leaves a mark."</p>
+          <div style="width:28px;height:2px;background:var(--accent2);margin-bottom:0.7rem;"></div>
+          <p style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;opacity:0.3;text-transform:uppercase;">— Print Studio</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="print-cta-strip reveal">
+      <div class="print-cta-strip-text"><h3>Ready to Print?</h3><p>Send your brief or artwork and get a quote within 24 hours. We handle design-to-delivery end to end.</p></div>
+      <div class="print-cta-btns"><a href="#contact" class="btn-primary">Get a Quote</a><a href="#contact" class="btn-outline">View Print Portfolio</a></div>
+    </div>
+    </div>
+
+  </div>
+
+  <div class="print-marquee">
+    <div class="print-marquee-track">
+      <span class="print-marquee-item">Banners</span><span class="print-marquee-item">Stickers</span><span class="print-marquee-item">Paper Bags</span><span class="print-marquee-item">T-Shirts</span><span class="print-marquee-item">Nylon Bags</span><span class="print-marquee-item">Direct Image</span><span class="print-marquee-item">SAV Printing</span><span class="print-marquee-item">Business Cards</span><span class="print-marquee-item">Signage</span><span class="print-marquee-item">Mugs</span><span class="print-marquee-item">Souvenirs</span><span class="print-marquee-item">Jotters</span><span class="print-marquee-item">Invitation Cards</span><span class="print-marquee-item">Labels</span>
+      <span class="print-marquee-item">Banners</span><span class="print-marquee-item">Stickers</span><span class="print-marquee-item">Paper Bags</span><span class="print-marquee-item">T-Shirts</span><span class="print-marquee-item">Nylon Bags</span><span class="print-marquee-item">Direct Image</span><span class="print-marquee-item">SAV Printing</span><span class="print-marquee-item">Business Cards</span><span class="print-marquee-item">Signage</span><span class="print-marquee-item">Mugs</span><span class="print-marquee-item">Souvenirs</span><span class="print-marquee-item">Jotters</span><span class="print-marquee-item">Invitation Cards</span><span class="print-marquee-item">Labels</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="cta-bg"></div>
+  <h2 class="reveal">Let's Build<br><em>Something</em><br>Unforgettable</h2>
+  <a href="mailto:Adeniyiadeyinkar@gmail.com" class="cta-email reveal">Adeniyiadeyinkar@gmail.com.</a>
+  <div class="cta-social reveal">
+    <a href="https://www.behance.net/Adeyinkar">Behance</a><a href="#">Dribbble</a><a href="https://www.linkedin.com/in/adeyinka-adeniyi-75466240a/" target="_blank" rel="noopener">LinkedIn</a><a href="#">Instagram</a><a href="#">YouTube</a>
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 Adeniyi Adeyinka. All rights reserved.</span>
+  <span>Lagos, Nigeria — Available Worldwide</span>
+  <span>Crafted with precision</span>
+</footer>
+
+<script>
+/* CURSOR */
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+(function tick(){ cursor.style.left=mx+'px'; cursor.style.top=my+'px'; rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(tick); })();
+
+/* THEME TOGGLE */
+const htmlEl=document.documentElement, tgl=document.getElementById('themeToggle'), tIcon=document.getElementById('toggleIcon');
+let isDark=true;
+function applyTheme(d){ isDark=d; htmlEl.setAttribute('data-theme',d?'dark':'light'); tIcon.textContent=d?'☀':'☾'; try{localStorage.setItem('aa-theme',d?'dark':'light');}catch(e){} }
+try{ if(localStorage.getItem('aa-theme')==='light') applyTheme(false); }catch(e){}
+tgl.addEventListener('click',()=>applyTheme(!isDark));
+
+/* SCROLL REVEAL */
+const revObs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); revObs.unobserve(e.target); } }),{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+/* PROJECT FILTER */
+const wItems=document.querySelectorAll('.work-item[data-category]');
+const wGrid=document.getElementById('workGrid');
+const wCount=document.getElementById('workCount');
+const wEmpty=document.getElementById('workEmpty');
+function runFilter(f){
+  let v=0;
+  wItems.forEach(item=>{ const m=f==='all'||item.dataset.category===f; if(m){ item.classList.remove('hidden','pop-in'); void item.offsetWidth; item.classList.add('pop-in'); v++; } else{ item.classList.add('hidden'); item.classList.remove('pop-in'); } });
+  f==='all'?wGrid.classList.remove('filtered'):(wGrid.classList.add('filtered'),wGrid.setAttribute('data-count',String(v)));
+  wCount.textContent=v===0?'No Projects':v===1?'1 Project':`${v} Projects`;
+  wEmpty.classList.toggle('show',v===0);
+}
+document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); runFilter(btn.dataset.filter); }));
+
+const printingSection = document.querySelector('.printing');
+const printingToggle = document.querySelector('.printing-toggle');
+if (printingSection && printingToggle) {
+  printingToggle.addEventListener('click', () => {
+    const isOpen = printingSection.classList.toggle('is-open');
+    printingToggle.setAttribute('aria-expanded', String(isOpen));
+    printingToggle.firstChild.textContent = isOpen ? 'Hide print services' : 'View print services';
+  });
+}
+
+/* IMAGE UPLOAD SYSTEM */
+function loadImg(wrapperId, inputEl) {
+  const file = inputEl.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const wrapper = document.getElementById(wrapperId);
+    if (!wrapper) return;
+    const preview = wrapper.querySelector('.img-preview');
+    const zone    = wrapper.querySelector('.img-zone');
+    if (preview) { preview.style.backgroundImage = `url('${e.target.result}')`; preview.style.backgroundSize='cover'; preview.style.backgroundPosition='center'; }
+    wrapper.classList.add('has-image');
+    if (zone) zone.classList.add('has-image');
+    try { sessionStorage.setItem('img_'+wrapperId, e.target.result); } catch(err) {}
+  };
+  reader.readAsDataURL(file);
+  inputEl.value = '';
+}
+
+function triggerUpload(wrapperId) {
+  const wrapper = document.getElementById(wrapperId);
+  if (!wrapper) return;
+  const inp = wrapper.querySelector('input[type="file"]');
+  if (inp) inp.click();
+}
+
+document.querySelectorAll('.img-zone').forEach(zone => {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    const inp = zone.querySelector('input[type="file"]');
+    if (!file || !inp) return;
+    const match = (inp.getAttribute('onchange') || '').match(/loadImg\('([^']+)'/);
+    if (match) loadImg(match[1], { files:[file], value:'', getAttribute:()=>'' });
+  });
+});
+
+(function restoreImages(){
+  try {
+    for (let i=0; i<sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (!key.startsWith('img_')) continue;
+      const wrapperId = key.slice(4);
+      const dataUrl   = sessionStorage.getItem(key);
+      if (!dataUrl) continue;
+      const wrapper = document.getElementById(wrapperId);
+      if (!wrapper) continue;
+      const preview = wrapper.querySelector('.img-preview');
+      const zone    = wrapper.querySelector('.img-zone');
+      if (preview) { preview.style.backgroundImage=`url('${dataUrl}')`; preview.style.backgroundSize='cover'; preview.style.backgroundPosition='center'; }
+      wrapper.classList.add('has-image');
+      if (zone) zone.classList.add('has-image');
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
